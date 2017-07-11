@@ -1,6 +1,5 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2015 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,9 +18,11 @@ require 'java_buildpack/util/cache'
 require 'java_buildpack/util/cache/cached_file'
 require 'java_buildpack/util/cache/inferred_network_failure'
 require 'java_buildpack/util/cache/internet_availability'
+require 'java_buildpack/util/configuration_utils'
 require 'java_buildpack/util/sanitizer'
 require 'monitor'
 require 'net/http'
+require 'openssl'
 require 'pathname'
 require 'tmpdir'
 require 'uri'
@@ -60,11 +61,17 @@ module JavaBuildpack
         #                           already in the cache
         # @return [Void]
         def get(uri, &block)
-          cached_file, downloaded = nil, nil
-          cached_file, downloaded = from_mutable_cache uri if InternetAvailability.instance.available?
-          cached_file, downloaded = from_immutable_caches(uri), false unless cached_file
+          cached_file             = nil
+          downloaded              = nil
 
-          fail "Unable to find cached file for #{uri.sanitize_uri}" unless cached_file
+          cached_file, downloaded = from_mutable_cache uri if InternetAvailability.instance.available?
+
+          unless cached_file
+            cached_file = from_immutable_caches(uri)
+            downloaded  = false
+          end
+
+          raise "Unable to find cached file for #{uri.sanitize_uri}" unless cached_file
           cached_file.cached(File::RDONLY | File::BINARY, downloaded, &block)
         end
 
@@ -80,7 +87,7 @@ module JavaBuildpack
 
         CA_FILE = (Pathname.new(__FILE__).dirname + '../../../../resources/ca_certs.pem').freeze
 
-        FAILURE_LIMIT = 5.freeze
+        FAILURE_LIMIT = 5
 
         HTTP_ERRORS = [
           EOFError,
@@ -117,7 +124,8 @@ module JavaBuildpack
           downloaded = false
 
           http.request request do |response|
-            @logger.debug { "Status: #{response.code}" }
+            @logger.debug { "Response headers: #{response.to_hash}" }
+            @logger.debug { "Response status: #{response.code}" }
 
             if response.is_a? Net::HTTPOK
               cache_etag response, cached_file
@@ -129,14 +137,22 @@ module JavaBuildpack
             elsif redirect?(response)
               downloaded = update URI(response['Location']), cached_file
             else
-              fail InferredNetworkFailure, "Bad response: #{response}"
+              raise InferredNetworkFailure, "#{response.code} #{response.message}\n#{response.body}"
             end
           end
 
           downloaded
         end
 
+        def ca_file(http_options)
+          return unless CA_FILE.exist?
+          http_options[:ca_file] = CA_FILE.to_s
+          @logger.debug { "Adding additional CA certificates from #{CA_FILE}" }
+        end
+
         def cache_content(response, cached_file)
+          compressed = compressed?(response)
+
           cached_file.cached(File::CREAT | File::WRONLY | File::BINARY) do |f|
             @logger.debug { "Persisting content to #{f.path}" }
 
@@ -145,7 +161,7 @@ module JavaBuildpack
             f.fsync
           end
 
-          validate_size response['Content-Length'], cached_file
+          validate_size response['Content-Length'], cached_file unless compressed
         end
 
         def cache_etag(response, cached_file)
@@ -174,6 +190,31 @@ module JavaBuildpack
             f.write last_modified
             f.fsync
           end
+        end
+
+        def client_authentication(http_options)
+          client_authentication = JavaBuildpack::Util::ConfigurationUtils.load('cache')['client_authentication']
+
+          certificate_location = client_authentication['certificate_location']
+          if certificate_location
+            File.open(certificate_location) do |f|
+              http_options[:cert] = OpenSSL::X509::Certificate.new f.read
+              @logger.debug { "Adding client certificate from #{certificate_location}" }
+            end
+          end
+
+          private_key_location = client_authentication['private_key_location']
+
+          return unless private_key_location
+
+          File.open(private_key_location) do |f|
+            http_options[:key] = OpenSSL::PKey.read f.read, client_authentication['private_key_password']
+            @logger.debug { "Adding private key from #{private_key_location}" }
+          end
+        end
+
+        def compressed?(response)
+          %w[br compress deflate gzip x-gzip].include?(response['Content-Encoding'])
         end
 
         def debug_ssl(http)
@@ -217,17 +258,22 @@ module JavaBuildpack
             http_options[:use_ssl] = true
             @logger.debug { 'Adding HTTP options for secure connection' }
 
-            if CA_FILE.exist?
-              http_options[:ca_file] = CA_FILE.to_s
-              @logger.debug { "Adding additional certs from #{CA_FILE}" }
-            end
+            ca_file http_options
+            client_authentication http_options
           end
 
           http_options
         end
 
+        def no_proxy?(uri)
+          hosts = (ENV['no_proxy'] || ENV['NO_PROXY'] || '').split ','
+          hosts.any? { |host| uri.host.end_with? host }
+        end
+
         def proxy(uri)
-          proxy_uri = if secure?(uri)
+          proxy_uri = if no_proxy?(uri)
+                        URI.parse('')
+                      elsif secure?(uri)
                         URI.parse(ENV['https_proxy'] || ENV['HTTPS_PROXY'] || '')
                       else
                         URI.parse(ENV['http_proxy'] || ENV['HTTP_PROXY'] || '')
@@ -281,22 +327,22 @@ module JavaBuildpack
               InternetAvailability.instance.available false, "Request failed: #{e.message}"
               raise e
             else
-              @logger.warn { "Request failure #{failures}, retrying: #{e.message}" }
+              @logger.warn { "Request failure #{failures}, retrying.  Failure: #{e.message}" }
               retry
             end
           end
         end
 
         def validate_size(expected_size, cached_file)
-          return unless  expected_size
+          return unless expected_size
 
-          actual_size = cached_file.cached(File::RDONLY) { |f| f.size }
+          actual_size = cached_file.cached(File::RDONLY, &:size)
           @logger.debug { "Validated content size #{actual_size} is #{expected_size}" }
 
           return if expected_size.to_i == actual_size
 
           cached_file.destroy
-          fail InferredNetworkFailure, "Content has invalid size.  Was #{actual_size}, should be #{expected_size}."
+          raise InferredNetworkFailure, "Content has invalid size.  Was #{actual_size}, should be #{expected_size}."
         end
 
       end

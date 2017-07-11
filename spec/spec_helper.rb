@@ -1,6 +1,5 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2015 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-require 'simplecov'
-SimpleCov.start do
-  add_filter 'spec'
-end
-
-require 'codeclimate-test-reporter'
-CodeClimate::TestReporter.start
 
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow: 'codeclimate.com')

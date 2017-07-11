@@ -1,6 +1,5 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2015 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +16,7 @@
 require 'spec_helper'
 require 'java_buildpack/component/application'
 require 'java_buildpack/component/services'
-require 'yaml'
+require 'json'
 
 shared_context 'application_helper' do
 
@@ -26,8 +25,8 @@ shared_context 'application_helper' do
   previous_environment = ENV.to_hash
 
   let(:environment) do
-    { 'test-key'      => 'test-value', 'VCAP_APPLICATION' => vcap_application.to_yaml,
-      'VCAP_SERVICES' => vcap_services.to_yaml }
+    { 'test-key'      => 'test-value', 'VCAP_APPLICATION' => vcap_application.to_json,
+      'VCAP_SERVICES' => vcap_services.to_json }
   end
 
   before do
@@ -46,7 +45,13 @@ shared_context 'application_helper' do
 
   let(:services) { application.services }
 
-  let(:vcap_application) { { 'application_name' => 'test-application-name' } }
+  let(:vcap_application) do
+    { 'application_id'      => 'test-application-id',
+      'application_name'    => 'test-application-name',
+      'application_version' => 'test-application-version',
+      'space_id'            => 'test-space-id',
+      'space_name'          => 'test-space-name' }
+  end
 
   let(:vcap_services) do
     { 'test-service-n/a' => [{ 'name'        => 'test-service-name', 'label' => 'test-service-n/a',
@@ -65,8 +70,12 @@ shared_context 'application_helper' do
     application
   end
 
-  after do
-    FileUtils.rm_rf app_dir
+  after do |example|
+    if example.metadata[:no_cleanup]
+      puts "Application Directory: #{app_dir}"
+    else
+      FileUtils.rm_rf app_dir
+    end
   end
 
 end

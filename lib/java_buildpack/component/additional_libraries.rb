@@ -1,6 +1,5 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2015 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'fileutils'
 require 'java_buildpack/component'
 require 'java_buildpack/util/qualify_path'
 
@@ -30,7 +30,6 @@ module JavaBuildpack
       #
       # @param [Pathname] droplet_root the root directory of the droplet
       def initialize(droplet_root)
-        @paths        = []
         @droplet_root = droplet_root
       end
 

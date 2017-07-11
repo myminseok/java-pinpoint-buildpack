@@ -1,6 +1,5 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2015 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +49,7 @@ module JavaBuildpack
       #                                      an +Array<String>+ that uniquely identifies the component (e.g.
       #                                      +open_jdk=1.7.0_40+).  Otherwise, +nil+.
       def detect
-        fail "Method 'detect' must be defined"
+        raise "Method 'detect' must be defined"
       end
 
       # Modifies the application's file system.  The component is expected to transform the application's file system in
@@ -59,7 +58,7 @@ module JavaBuildpack
       #
       # @return [Void]
       def compile
-        fail "Method 'compile' must be defined"
+        raise "Method 'compile' must be defined"
       end
 
       # Modifies the application's runtime configuration. The component is expected to transform members of the
@@ -69,10 +68,11 @@ module JavaBuildpack
       # Container components are also expected to create the command required to run the application.  These components
       # are expected to read the +context+ values and take them into account when creating the command.
       #
-      # @return [void, String] components other than containers are not expected to return any value.  Container
-      #                        components are expected to return the command required to run the application.
+      # @return [void, String] components other than containers and JREs are not expected to return any value.
+      #                        Container and JRE components are expected to return a command required to run the
+      #                        application.
       def release
-        fail "Method 'release' must be defined"
+        raise "Method 'release' must be defined"
       end
 
       protected
@@ -113,21 +113,26 @@ module JavaBuildpack
       #
       # @param [String] version the version of the download
       # @param [String] uri the uri of the download
+      # @param [Boolean] strip_top_level whether to strip the top-level directory when expanding. Defaults to +true+.
       # @param [Pathname] target_directory the directory to expand the TAR file to.  Defaults to the component's
       #                                    sandbox.
       # @param [String] name an optional name for the download and expansion.  Defaults to +@component_name+.
       # @return [Void]
-      def download_tar(version, uri, target_directory = @droplet.sandbox, name = @component_name)
+      def download_tar(version, uri, strip_top_level = true, target_directory = @droplet.sandbox,
+                       name = @component_name)
         download(version, uri, name) do |file|
           with_timing "Expanding #{name} to #{target_directory.relative_path_from(@droplet.root)}" do
             FileUtils.mkdir_p target_directory
-            shell "tar xzf #{file.path} -C #{target_directory} --strip 1 2>&1"
+            shell "tar x#{compression_flag(file)}f #{file.path} -C #{target_directory} " \
+                  "#{'--strip 1' if strip_top_level} 2>&1"
           end
         end
       end
 
       # Downloads a given ZIP file and expands it.
       #
+      # @param [String] version the version of the download
+      # @param [String] uri the uri of the download
       # @param [Boolean] strip_top_level whether to strip the top-level directory when expanding. Defaults to +true+.
       # @param [Pathname] target_directory the directory to expand the ZIP file to.  Defaults to the component's
       #                                    sandbox.
@@ -163,6 +168,26 @@ module JavaBuildpack
         yield
 
         puts "(#{(Time.now - start_time).duration})"
+      end
+
+      private
+
+      def gzipped?(file)
+        file.path.end_with? '.gz'
+      end
+
+      def bzipped?(file)
+        file.path.end_with? '.bz2'
+      end
+
+      def compression_flag(file)
+        if gzipped?(file)
+          'z'
+        elsif bzipped?(file)
+          'j'
+        else
+          ''
+        end
       end
 
     end

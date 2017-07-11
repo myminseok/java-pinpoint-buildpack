@@ -3,35 +3,52 @@ require: rubocop-rspec
 
 AllCops:
   Include:
-    - '**/Rakefile'
-    - 'rakelib/**/*'
+  - '**/Rakefile'
+  - 'rakelib/**/*'
   Exclude:
-    - 'build/**/*'
-    - 'vendor/**/*'
+  - 'build/**/*'
+  - Gemfile            # TODO: Remove when upgrading to any version after 0.48.1
+Layout/EmptyLinesAroundBlockBody:
+  Exclude:
+  - 'spec/**/*.rb'
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: false
+Layout/IndentHeredoc:  # TODO: Remove when dropping 2.2.x support
+  Enabled: false
+Layout/MultilineOperationIndentation:
+  Enabled: false
 Metrics/AbcSize:
- Max: 18
+ Max: 22
+Metrics/BlockLength:
+  Exclude:
+  - 'spec/**/*.rb'
 Metrics/ClassLength:
-  Max: 200
+  Max: 250
 Metrics/CyclomaticComplexity:
   Max: 10
 Metrics/LineLength:
   Max: 120
 Metrics/MethodLength:
-  Max: 17
+  Max: 18
 Metrics/ParameterLists:
-  Max: 6
+  Max: 8
 Metrics/PerceivedComplexity:
   Max: 10
+RSpec/ExampleLength:
+  Max: 20
+RSpec/AnyInstance:
+  Enabled: false
+RSpec/ExpectOutput:
+  Enabled: false
 RSpec/FilePath:
   Enabled: false
+RSpec/MultipleExpectations:
+  Enabled: false
+RSpec/NestedGroups:
+  Max: 4
 Style/Documentation:
   Enabled: false
-Style/EmptyLinesAroundBlockBody:
-  Exclude:
-    - 'spec/**/*'
-Style/EmptyLinesAroundClassBody:
-  Enabled: false
-Style/EmptyLinesAroundModuleBody:
-  Enabled: false
-Style/MultilineOperationIndentation:
+Style/MethodMissing:
   Enabled: false

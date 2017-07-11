@@ -23,10 +23,12 @@ The credential payload of the service may contain the following entries:
 
 | Name | Description
 | ---- | -----------
-| `licenseKey` | The license key to use when authenticating
+| `license_key` | (Optional) Either this credential or `licenseKey` must be provided. If both are provided then the value for `license_key` will always win. The license key to use when authenticating.
+| `licenseKey` | (Optional) As above.
+| `***` | (Optional) Any additional entries will be applied as a system property appended to `-Dnewrelic.config.` to allow full configuration of the agent.
 
 ## Configuration
-For general information on configuring the buildpack, refer to [Configuration and Extension][].
+For general information on configuring the buildpack, including how to specify configuration values through environment variables, refer to [Configuration and Extension][].
 
 The framework can be configured by modifying the [`config/new_relic_agent.yml`][] file in the buildpack fork.  The framework uses the [`Repository` utility support][repositories] and so it supports the [version syntax][] defined there.
 
@@ -42,5 +44,5 @@ The framework can also be configured by overlaying a set of resources on the def
 [`config/new_relic_agent.yml`]: ../config/new_relic_agent.yml
 [New Relic Service]: https://newrelic.com
 [repositories]: extending-repositories.md
-[this listing]: http://download.pivotal.io.s3.amazonaws.com/new-relic/index.yml
+[this listing]: https://download.run.pivotal.io/new-relic/index.yml
 [version syntax]: extending-repositories.md#version-syntax-and-ordering

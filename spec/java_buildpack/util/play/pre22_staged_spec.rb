@@ -1,6 +1,5 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright (c) 2013 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,21 +89,21 @@ describe JavaBuildpack::Util::Play::Pre22Staged do
       play_app.compile
 
       staged_dir = app_dir + 'staged'
-      test_jar_1 = staged_dir + 'test-jar-1.jar'
-      test_jar_2 = staged_dir + 'test-jar-2.jar'
+      test_jar1 = staged_dir + 'test-jar-1.jar'
+      test_jar2 = staged_dir + 'test-jar-2.jar'
 
-      expect(test_jar_1).to exist
-      expect(test_jar_1).to be_symlink
-      expect(test_jar_1.readlink).to eq((additional_libs_directory + 'test-jar-1.jar').relative_path_from(staged_dir))
+      expect(test_jar1).to exist
+      expect(test_jar1).to be_symlink
+      expect(test_jar1.readlink).to eq((additional_libs_directory + 'test-jar-1.jar').relative_path_from(staged_dir))
 
-      expect(test_jar_2).to exist
-      expect(test_jar_2).to be_symlink
-      expect(test_jar_2.readlink).to eq((additional_libs_directory + 'test-jar-2.jar').relative_path_from(staged_dir))
+      expect(test_jar2).to exist
+      expect(test_jar2).to be_symlink
+      expect(test_jar2.readlink).to eq((additional_libs_directory + 'test-jar-2.jar').relative_path_from(staged_dir))
     end
 
     it 'returns command' do
-      expect(play_app.release).to eq("PATH=#{java_home.root}/bin:$PATH #{java_home.as_env_var} $PWD/start " \
-                                       'test-opt-2 test-opt-1 -Dhttp.port=$PORT')
+      expect(play_app.release).to eq('test-var-2 test-var-1 PATH=$PWD/.test-java-home/bin:$PATH ' \
+                                     "#{java_home.as_env_var} exec $PWD/start $JAVA_OPTS")
     end
 
   end

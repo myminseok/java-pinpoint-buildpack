@@ -1,6 +1,5 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2015 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +18,11 @@ require 'application_helper'
 require 'logging_helper'
 require 'java_buildpack/component/additional_libraries'
 require 'java_buildpack/component/droplet'
-require 'java_buildpack/component/java_opts'
+require 'java_buildpack/component/environment_variables'
+require 'java_buildpack/component/extension_directories'
 require 'java_buildpack/component/immutable_java_home'
+require 'java_buildpack/component/java_opts'
+require 'java_buildpack/component/security_providers'
 require 'java_buildpack/util/snake_case'
 require 'pathname'
 
@@ -35,25 +37,41 @@ shared_context 'droplet_helper' do
   let(:component_id) { described_class.to_s.split('::').last.snake_case }
 
   let(:droplet) do
-    JavaBuildpack::Component::Droplet.new(additional_libraries, component_id, java_home, java_opts, app_dir)
+    JavaBuildpack::Component::Droplet.new(additional_libraries, component_id, environment_variables,
+                                          extension_directories, java_home, java_opts, app_dir, security_providers)
   end
+
+  let(:extension_directories) { JavaBuildpack::Component::ExtensionDirectories.new app_dir }
 
   let(:sandbox) { droplet.sandbox }
 
   let(:java_home) do
-    delegate = double('MutableJavaHome', root: app_dir + '.test-java-home', version: %w(1 7 55 u60))
+    delegate = instance_double('MutableJavaHome', root: app_dir + '.test-java-home', version: %w[1 7 55 u60])
     JavaBuildpack::Component::ImmutableJavaHome.new delegate, app_dir
+  end
+
+  let(:environment_variables) do
+    java_opts = JavaBuildpack::Component::EnvironmentVariables.new app_dir
+    java_opts.concat %w[test-var-2 test-var-1]
+    java_opts
   end
 
   let(:java_opts) do
     java_opts = JavaBuildpack::Component::JavaOpts.new app_dir
-    java_opts.concat %w(test-opt-2 test-opt-1)
+    java_opts.concat %w[test-opt-2 test-opt-1]
     java_opts
   end
+
+  let(:security_providers) { JavaBuildpack::Component::SecurityProviders.new }
 
   before do
     FileUtils.cp_r 'spec/fixtures/additional_libs/.', additional_libs_directory
     additional_libs_directory.children.each { |child| additional_libraries << child }
+
+    extension_directories << sandbox + 'test-extension-directory-1'
+    extension_directories << sandbox + 'test-extension-directory-2'
+
+    security_providers.concat %w[test-security-provider-1 test-security-provider-2]
   end
 
 end
