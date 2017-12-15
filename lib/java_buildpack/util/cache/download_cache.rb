@@ -40,6 +40,8 @@ module JavaBuildpack
       # * {http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html HTTP/1.1 Header Field Definitions}
       class DownloadCache
 
+        attr_writer :retry_max
+
         # Creates an instance of the cache that is backed by a number of filesystem locations.  The first argument
         # (+mutable_cache_root+) is the only location that downloaded files will be stored in.
         #
@@ -51,6 +53,7 @@ module JavaBuildpack
           @logger                = JavaBuildpack::Logging::LoggerFactory.instance.get_logger DownloadCache
           @mutable_cache_root    = mutable_cache_root
           @immutable_cache_roots = immutable_cache_roots.unshift mutable_cache_root
+          @retry_max             = RETRY_MAX
         end
 
         # Retrieves an item from the cache. Yields an open file containing the item's content or raises an exception if
@@ -118,7 +121,11 @@ module JavaBuildpack
           Net::HTTPTemporaryRedirect
         ].freeze
 
-        private_constant :CA_FILE, :FAILURE_LIMIT, :HTTP_ERRORS, :REDIRECT_TYPES
+        RETRY_MAX = 60
+
+        RETRY_MIN = 5
+
+        private_constant :CA_FILE, :FAILURE_LIMIT, :HTTP_ERRORS, :REDIRECT_TYPES, :RETRY_MAX, :RETRY_MIN
 
         def attempt(http, request, cached_file)
           downloaded = false
@@ -142,6 +149,26 @@ module JavaBuildpack
           end
 
           downloaded
+        end
+
+        def attempt_update(cached_file, http, uri)
+          request = request uri, cached_file
+          request.basic_auth uri.user, uri.password if uri.user && uri.password
+
+          failures = 0
+          begin
+            attempt http, request, cached_file
+          rescue InferredNetworkFailure, *HTTP_ERRORS => e
+            if (failures += 1) > FAILURE_LIMIT
+              InternetAvailability.instance.available false, "Request failed: #{e.message}"
+              raise e
+            else
+              delay = calculate_delay failures
+              @logger.warn { "Request failure #{failures}, retrying after #{delay}s.  Failure: #{e.message}" }
+              sleep delay
+              retry
+            end
+          end
         end
 
         def ca_file(http_options)
@@ -169,7 +196,7 @@ module JavaBuildpack
 
           return unless etag
 
-          @logger.debug { "Persisting etag: #{etag}" }
+          @logger.debug { "Persisting Etag: #{etag}" }
 
           cached_file.etag(File::CREAT | File::WRONLY | File::BINARY) do |f|
             f.truncate(0)
@@ -183,13 +210,17 @@ module JavaBuildpack
 
           return unless last_modified
 
-          @logger.debug { "Persisting last-modified: #{last_modified}" }
+          @logger.debug { "Persisting Last-Modified: #{last_modified}" }
 
           cached_file.last_modified(File::CREAT | File::WRONLY | File::BINARY) do |f|
             f.truncate(0)
             f.write last_modified
             f.fsync
           end
+        end
+
+        def calculate_delay(failures)
+          [@retry_max, RETRY_MIN * (2**(failures - 1))].min
         end
 
         def client_authentication(http_options)
@@ -293,10 +324,12 @@ module JavaBuildpack
           if cached_file.etag?
             cached_file.etag(File::RDONLY | File::BINARY) { |f| request['If-None-Match'] = File.read(f) }
           end
+          @logger.debug { "Adding If-None-Match: #{request['If-None-Match']}" }
 
           if cached_file.last_modified?
             cached_file.last_modified(File::RDONLY | File::BINARY) { |f| request['If-Modified-Since'] = File.read(f) }
           end
+          @logger.debug { "Adding If-Modified-Since: #{request['If-Modified-Since']}" }
 
           @logger.debug { "Request: #{request.path}, #{request.to_hash}" }
           request
@@ -307,29 +340,13 @@ module JavaBuildpack
         end
 
         def update(uri, cached_file)
-          proxy(uri).start(uri.host, uri.port, http_options(uri)) do |http|
-            @logger.debug { "HTTP: #{http.address}, #{http.port}, #{http_options(uri)}" }
+          http_options = http_options(uri)
+
+          proxy(uri).start(uri.host, uri.port, http_options) do |http|
+            @logger.debug { "HTTP: #{http.address}, #{http.port}, #{http_options}" }
             debug_ssl(http) if secure?(uri)
 
             attempt_update(cached_file, http, uri)
-          end
-        end
-
-        def attempt_update(cached_file, http, uri)
-          request = request uri, cached_file
-          request.basic_auth uri.user, uri.password if uri.user && uri.password
-
-          failures = 0
-          begin
-            attempt http, request, cached_file
-          rescue InferredNetworkFailure, *HTTP_ERRORS => e
-            if (failures += 1) > FAILURE_LIMIT
-              InternetAvailability.instance.available false, "Request failed: #{e.message}"
-              raise e
-            else
-              @logger.warn { "Request failure #{failures}, retrying.  Failure: #{e.message}" }
-              retry
-            end
           end
         end
 

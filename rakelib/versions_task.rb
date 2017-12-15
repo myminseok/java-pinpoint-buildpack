@@ -50,15 +50,20 @@ module Package
 
     NAME_MAPPINGS = {
       'access_logging_support'              => 'Tomcat Access Logging Support',
+      'agent'                               => 'Java Memory Assistant Agent',
       'app_dynamics_agent'                  => 'AppDynamics Agent',
+      'clean_up'                            => 'Java Memory Assistant Clean Up',
+      'client_certificate_mapper'           => 'Client Certificate Mapper',
       'container_customizer'                => 'Spring Boot Container Customizer',
       'container_security_provider'         => 'Container Security Provider',
       'contrast_security_agent'             => 'Contrast Security Agent',
       'dyadic_ekm_security_provider'        => 'Dyadic EKM Security Provider',
       'dynatrace_appmon_agent'              => 'Dynatrace Appmon Agent',
       'dynatrace_one_agent'                 => 'Dynatrace OneAgent',
+      'geode_store'                         => 'Apache Geode Tomcat Session Store',
       'google_stackdriver_debugger'         => 'Google Stackdriver Debugger',
       'groovy'                              => 'Groovy',
+      'introscope_agent'                    => 'CA Introscope APM Framework',
       'jre'                                 => 'OpenJDK JRE',
       'jrebel_agent'                        => 'JRebel Agent',
       'jvmkill_agent'                       => 'jvmkill Agent',
@@ -69,13 +74,12 @@ module Package
       'memory_calculator'                   => 'Memory Calculator',
       'metric_writer'                       => 'Metric Writer',
       'new_relic_agent'                     => 'New Relic Agent',
-      'play_framework_auto_reconfiguration' => 'Play Framework Auto-reconfiguration',
-      'play_framework_jpa_plugin'           => 'Play Framework JPA Plugin',
       'postgresql_jdbc'                     => 'PostgreSQL JDBC Driver',
       'protect_app_security_provider'       => 'Gemalto ProtectApp Security Provider',
       'redis_store'                         => 'Redis Session Store',
       'spring_auto_reconfiguration'         => 'Spring Auto-reconfiguration',
       'spring_boot_cli'                     => 'Spring Boot CLI',
+      'takipi_agent'                        => 'Takipi Agent',
       'tomcat'                              => 'Tomcat',
       'your_kit_profiler'                   => 'YourKit Profiler'
     }.freeze
@@ -180,9 +184,12 @@ module Package
         index_configuration(configuration).each do |index_configuration|
           version, uri = get_from_cache(cache, configuration, index_configuration)
 
+          name = NAME_MAPPINGS[id]
+          raise "Unable to resolve name for '#{id}'" unless name
+
           dependency_versions << {
             'id'      => id,
-            'name'    => NAME_MAPPINGS[id] || "UNKNOWN (#{id})",
+            'name'    => name,
             'uri'     => uri,
             'version' => version
           }

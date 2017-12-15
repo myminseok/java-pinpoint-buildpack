@@ -49,6 +49,7 @@
       <w>libcklog</w>
       <w>libcrpytoki</w>
       <w>libcryptoki</w>
+      <w>libjvm</w>
       <w>libruxitagentloader</w>
       <w>libyjpagent</w>
       <w>ljust</w>
@@ -64,6 +65,7 @@
       <w>myhost</w>
       <w>mypass</w>
       <w>myuser</w>
+      <w>networkaddress</w>
       <w>newrelic</w>
       <w>newrelicagent</w>
       <w>overweaving</w>
@@ -99,6 +101,7 @@
       <w>stubframework</w>
       <w>stubjre</w>
       <w>submodules</w>
+      <w>takipi</w>
       <w>tasklib</w>
       <w>teamserver</w>
       <w>tenanttoken</w>

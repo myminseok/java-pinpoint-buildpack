@@ -49,6 +49,7 @@ module JavaBuildpack
         enabled? && (
             jrebel_configured?(@application.root) ||
             jrebel_configured?(@application.root + 'WEB-INF/classes') ||
+            jrebel_configured?(@application.root + 'BOOT-INF/classes') ||
             jars_with_jrebel_configured?(@application.root))
       end
 
@@ -59,7 +60,9 @@ module JavaBuildpack
       end
 
       def jars_with_jrebel_configured?(root_path)
-        (root_path + '**/*.jar').glob.any? { |jar| !`unzip -l "#{jar}" | grep "rebel-remote\\.xml$"`.strip.empty? }
+        (root_path + '**/*.jar')
+          .glob.reject(&:directory?)
+          .any? { |jar| !`unzip -l "#{jar}" | grep "rebel-remote\\.xml$"`.strip.empty? }
       end
 
       def lib_name
