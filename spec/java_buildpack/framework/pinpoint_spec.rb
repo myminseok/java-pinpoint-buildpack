@@ -30,7 +30,7 @@ describe JavaBuildpack::Framework::PinpointAgent do
   context do
 
     before do
-     allow(services).to receive(:one_service?).with(/pinpoint/, 'uri').and_return(true)
+     allow(services).to receive(:one_service?).with(/2pinpoint/, 'uri').and_return(true)
     end
 
     it 'detects with dynatrace-n/a service' do
