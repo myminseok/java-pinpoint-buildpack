@@ -45,7 +45,7 @@ module JavaBuildpack
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
        
-        @droplet.java_opts.add_javaagent(@droplet.sandbox + jar_name)
+        @droplet.java_opts.add_javaagent(@droplet.sandbox + "pinpoint-bootstrap-1.7.4-SNAPSHOT.jar")
 
       end
 
