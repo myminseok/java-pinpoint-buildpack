@@ -31,22 +31,12 @@ module JavaBuildpack
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_zip(false, @droplet.sandbox, 'Pinpoint Agent')
-
-        #JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
-        #  true, 'The Pinpoint Agent download location is always accessible'
-        #) do
-        #   FileUtils.mkdir @droplet.sandbox.relative_path_from(@droplet.root)
-        #  download(@version, @uri) { |file| expand file }
-        #end
-
         @droplet.copy_resources
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-       
-        #@droplet.java_opts.add_javaagent(@droplet.sandbox + "pinpoint-bootstrap-1.7.4-SNAPSHOT.jar")
-
+        @droplet.java_opts.add_javaagent(@droplet.sandbox + "pinpoint-bootstrap-1.7.4-SNAPSHOT.jar")
       end
 
       protected
