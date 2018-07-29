@@ -95,12 +95,12 @@ module JavaBuildpack
 
       def download_local()
 
-        with_timing "Expanding PinpointAgent to #{@droplet.sandbox.relative_path_from(@droplet.root)}" do
+        with_timing "downloading pinpoint.config1 to #{@droplet.sandbox.relative_path_from(@droplet.root)}" do
           Dir.mktmpdir do |root|
             root_path = Pathname.new(root)
             shell "wget -O pinpoint.config1 https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
             FileUtils.mkdir_p(@droplet.sandbox)
-            #FileUtils.mv(root_path+ "/pinpoint.config1", @droplet.sandbox)
+            FileUtils.mv(root_path+ "/pinpoint.config1", @droplet.sandbox)
           end
         end
 
