@@ -27,15 +27,16 @@ module JavaBuildpack
 
     # Encapsulates the functionality for enabling zero-touch Dynatrace SaaS/Managed support.
     class PinpointAgent < JavaBuildpack::Component::VersionedDependencyComponent
+      include JavaBuildpack::Util
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
 
         #download_zip
         JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
-          true, '1The Pinpoint Agent download location is always accessible'
+          true, 'The Pinpoint Agent download location is always accessible'
         ) do
-          download_zip(@version, @uri, true, @droplet.sandbox, @component_name) { |file| expand file }
+          download(@version, @uri) { |file| expand file }
         end
 
         @droplet.copy_resources
