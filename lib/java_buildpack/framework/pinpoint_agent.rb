@@ -55,6 +55,11 @@ module JavaBuildpack
         credentials = @application.services.find_service(FILTER)['credentials']
         @logger.info { "credentials['collector_ip']  #{credentials['collector_ip']}" }
         @logger.info { "credentials['collector_port']  #{credentials['collector_port']}" }
+
+       
+        @droplet.java_opts.add_system_property('pinpoint.agentId', @application.details['application_name'])
+        @droplet.java_opts.add_system_property('pinpoint.applicationName', @application.details['application_name'])
+        
         #@droplet.environment_variables.add_environment_variable('PINPOINT_PROFILER_COLLECTOR_IP', credentials['collector_ip'])
         #@droplet.java_opts.add_system_property('PINPOINT_PROFILER_COLLECTOR_IP', credentials['collector_ip'])
       end
