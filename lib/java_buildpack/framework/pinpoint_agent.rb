@@ -37,6 +37,13 @@ module JavaBuildpack
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         @droplet.java_opts.add_javaagent(@droplet.sandbox + "pinpoint-bootstrap-1.7.4-SNAPSHOT.jar")
+
+        environment_variables = @droplet.environment_variables
+
+        environment_variables
+          .add_environment_variable(PINPOINT_PROFILER_COLLECTOR_IP, credentials[uri])
+
+
       end
 
       protected
