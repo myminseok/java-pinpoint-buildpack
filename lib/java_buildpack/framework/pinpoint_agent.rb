@@ -57,7 +57,7 @@ module JavaBuildpack
         @logger.info { "credentials['collector_port']  #{credentials['collector_port']}" }
         @droplet.environment_variables
                 .add_environment_variable('PINPOINT_PROFILER_COLLECTOR_IP', credentials['collector_ip'])
-
+        @droplet.java_opts.add_system_property('PINPOINT_PROFILER_COLLECTOR_IP', credentials['collector_ip'])
       end
 
       protected
