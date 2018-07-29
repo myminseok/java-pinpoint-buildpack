@@ -53,8 +53,9 @@ module JavaBuildpack
 
 
         credentials = @application.services.find_service(FILTER)['credentials']
-        @logger.warn { "credentials['uri']  #{credentials['uri']}" }
-        @droplet.environment_variables.add_environment_variable(PINPOINT_PROFILER_COLLECTOR_IP, credentials['uri'])
+        @logger.warn { "credentials['collector_ip']  #{credentials['collector_ip']}" }
+        @logger.warn { "credentials['collector_port']  #{credentials['collector_port']}" }
+        @droplet.environment_variables.add_environment_variable(PINPOINT_PROFILER_COLLECTOR_IP, credentials['uricollector_ip
 
       end
 
