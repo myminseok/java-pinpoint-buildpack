@@ -34,7 +34,7 @@ module JavaBuildpack
 
         #download_jar
         JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
-          true, 'The Dynatrace One Agent download location is always accessible'
+          true, 'The Pinpoint Agent download location is always accessible'
         ) do
           download(@version, @uri) { |file| expand file }
         end
