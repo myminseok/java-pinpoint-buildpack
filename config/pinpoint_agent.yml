@@ -16,5 +16,4 @@
 # Configuration for the Dynatrace SaaS/Managed framework
 ---
 version: 1.+
-#repository_root: https://repo.dyadicsec.com/cust/pcf
 repository_root: https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master
