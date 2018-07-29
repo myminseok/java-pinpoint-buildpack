@@ -30,7 +30,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        download_zip
+        download_tar
 
         #download_jar
         #JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
