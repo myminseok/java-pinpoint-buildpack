@@ -38,7 +38,9 @@ module JavaBuildpack
       def release
         @droplet.java_opts.add_javaagent(@droplet.sandbox + "pinpoint-bootstrap-1.7.4-SNAPSHOT.jar")
 
-        credentials = @application.services.find_service(FILTER, "user-provided")['credentials']
+
+        #credentials = @application.services.find_service(FILTER, 'servers')['credentials']
+        #credentials = @application.services.find_service(FILTER, "user-provided")['credentials']
 
         #environment_variables = @droplet.environment_variables
         #environment_variables.add_environment_variable(PINPOINT_PROFILER_COLLECTOR_IP, credentials[uri])
