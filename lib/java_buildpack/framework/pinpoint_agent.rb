@@ -42,7 +42,7 @@ module JavaBuildpack
       def compile
         download_zip(false, @droplet.sandbox, 'Pinpoint Agent')
         @droplet.copy_resources
-        download_local()
+        download_pinpoint_config()
         @droplet.copy_resources
 
       end
