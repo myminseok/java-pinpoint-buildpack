@@ -36,6 +36,7 @@ module JavaBuildpack
         JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
           true, 'The Pinpoint Agent download location is always accessible'
         ) do
+           FileUtils.mkdir @droplet.sandbox.relative_path_from(@droplet.root)
           download(@version, @uri) { |file| expand file }
         end
 
