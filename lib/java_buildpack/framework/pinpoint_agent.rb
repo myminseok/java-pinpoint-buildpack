@@ -94,12 +94,18 @@ module JavaBuildpack
 
 
       def download_local()
+
         print "#{'----->'.red.bold} wget -O pinpoint.config1 "
 
-        shell "wget -O pinpoint.config1 https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
-        shell "pwd && ls -al"
+        with_timing "1 Expanding PinpointAgent to #{@droplet.sandbox.relative_path_from(@droplet.root)}" do
+          Dir.mktmpdir do |root|
+            root_path = Pathname.new(root)
+            shell "wget -O pinpoint.config1 https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
+            FileUtils.mkdir_p(@droplet.sandbox)
+            FileUtils.mv(root_path + 'agent', @droplet.sandbox)
+          end
+        end
 
-        print "#{'----->'.red.bold} `pwd && ls -al`  "
       end
 
 

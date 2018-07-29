@@ -15,6 +15,6 @@
 
 # Debug configuration
 ---
-enabled: true
+enabled: false
 port: 8000
 suspend: false
