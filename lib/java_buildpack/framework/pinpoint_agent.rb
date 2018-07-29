@@ -92,10 +92,6 @@ module JavaBuildpack
 
     
 
-      def config_download_url
-        download_uri = 
-        ['latest', download_uri]
-      end
 
       def download_local()
         print "#{'----->'.red.bold} wget -O pinpoint.config1 "
@@ -103,7 +99,7 @@ module JavaBuildpack
         shell "wget -O pinpoint.config1 https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
         shell "pwd && ls -al"
 
-       print "#{'----->'.red.bold} `pwd && ls -al`  "
+        print "#{'----->'.red.bold} `pwd && ls -al`  "
       end
 
 
