@@ -42,7 +42,12 @@ module JavaBuildpack
       def compile
         download_zip(false, @droplet.sandbox, 'Pinpoint Agent')
         @droplet.copy_resources
-        download_pinpoint_config()
+
+        credentials = @application.services.find_service(FILTER)['credentials']
+        pinpoint_config_uri=credentials['pinpoint.config.uri']
+        @logger.info { "pinpoint_config_uri  #{pinpoint_config_uri}" }
+
+        download_pinpoint_config(pinpoint_config_uri)
         @droplet.copy_resources
 
       end
@@ -53,15 +58,14 @@ module JavaBuildpack
 
 
         credentials = @application.services.find_service(FILTER)['credentials']
-        @logger.info { "credentials['collector_ip']  #{credentials['collector_ip']}" }
-        @logger.info { "credentials['collector_port']  #{credentials['collector_port']}" }
+        @logger.info { "credentials['pinpoint.config.uri']  #{credentials['pinpoint.config.uri']}" }
 
        
         @droplet.java_opts.add_system_property('pinpoint.agentId', @application.details['application_name'])
         @droplet.java_opts.add_system_property('pinpoint.applicationName', @application.details['application_name'])
-        
+
         #@droplet.environment_variables.add_environment_variable('PINPOINT_PROFILER_COLLECTOR_IP', credentials['collector_ip'])
-        #@droplet.java_opts.add_system_property('PINPOINT_PROFILER_COLLECTOR_IP', credentials['collector_ip'])
+        #@droplet.java_opts.add_system_property('PINPOINT_PROFILER_COLLECTOR_IP', )
       end
 
       protected
@@ -94,11 +98,12 @@ module JavaBuildpack
 
     
 
-      def download_pinpoint_config()
+      def download_pinpoint_config(pinpoint_config_uri)
+
         with_timing "downloading pinpoint.config to #{@droplet.sandbox.relative_path_from(@droplet.root)}" do
           Dir.mktmpdir do |root|
             root_path = Pathname.new(root)
-            shell "wget -O pinpoint.config https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
+            shell "wget -O pinpoint.config #{pinpoint_config_uri}"
             FileUtils.mkdir_p(@droplet.sandbox)
             FileUtils.mv("./pinpoint.config", @droplet.sandbox)
           end
