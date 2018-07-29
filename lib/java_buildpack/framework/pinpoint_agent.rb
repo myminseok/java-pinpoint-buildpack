@@ -103,7 +103,7 @@ module JavaBuildpack
         shell "wget -O pinpoint.config1 https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
         shell "pwd && ls -al"
 
-       
+       print "#{'----->'.red.bold} `pwd && ls -al`  "
       end
 
 
