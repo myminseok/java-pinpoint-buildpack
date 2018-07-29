@@ -30,12 +30,14 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
+        download_zip
+
         #download_jar
-        JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
-          true, 'The Dynatrace One Agent download location is always accessible'
-        ) do
-          download(@version, @uri) { |file| expand file }
-        end
+        #JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
+        #  true, 'The Dynatrace One Agent download location is always accessible'
+        #) do
+        #  download(@version, @uri) { |file| expand file }
+        #end
 
         @droplet.copy_resources
       end
