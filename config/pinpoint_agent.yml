@@ -16,4 +16,4 @@
 # Configuration for the Dynatrace SaaS/Managed framework
 ---
 version: 1.+
-repository_root: https://download.ruxit.com/agent/paas/cloudfoundry/java
+repository_root: https://github.com/myminseok/blob/master/pinpoint_agent_repo
