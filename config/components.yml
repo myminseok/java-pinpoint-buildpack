@@ -39,7 +39,7 @@ jres:
 # The MultiBuildpack framework is first in order to allow any framework to override contributions from earlier buildpacks
 # The JavaOpts is last in order to allow any user-defined JAVA_OPTS to override contributions from earlier frameworks
 frameworks:
-  - "JavaBuildpack::Framework::PinPointAgent"
+  - "JavaBuildpack::Framework::PinpointAgent"
   - "JavaBuildpack::Framework::MultiBuildpack"
   - "JavaBuildpack::Framework::AppDynamicsAgent"
   - "JavaBuildpack::Framework::AspectjWeaverAgent"
