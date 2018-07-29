@@ -99,17 +99,12 @@ module JavaBuildpack
 
       def download_local(version, uri, name = @component_name)
         download_start_time = Time.now
-        print "#{'----->'.red.bold} Downloading #{name.blue.bold} #{version.to_s.blue} from #{uri} "
+        print "#{'----->'.red.bold} 2Downloading #{name.blue.bold} #{version.to_s.blue} from #{uri} "
 
-        JavaBuildpack::Util::Cache::CacheFactory.create.get(uri) do |file, downloaded|
-          if downloaded
-            puts "(#{(Time.now - download_start_time).duration})".green.italic
-          else
-            puts '(found in cache)'.green.italic
-          end
+        shell "wget #{uri}"
+        shell "pwd && ls -al"
 
-          yield file
-        end
+       
       end
 
 
