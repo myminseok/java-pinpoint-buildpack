@@ -98,9 +98,9 @@ module JavaBuildpack
         with_timing "downloading pinpoint.config1 to #{@droplet.sandbox.relative_path_from(@droplet.root)}" do
           Dir.mktmpdir do |root|
             root_path = Pathname.new(root)
-            shell "wget -O pinpoint.config1 https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
+            shell "wget -O pinpoint.config https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
             FileUtils.mkdir_p(@droplet.sandbox)
-            FileUtils.mv("./pinpoint.config1", @droplet.sandbox)
+            FileUtils.mv("./pinpoint.config", @droplet.sandbox)
           end
         end
 
