@@ -49,7 +49,7 @@ describe JavaBuildpack::Framework::PinpointAgent do
        app_fixture: 'framework_pinpoint_agent' do
 
       component.release
-      expect(java_opts).to include('-javaagent:$PWD/.java-buildpack/pinpoint_agent/pinpoint-bootstrap-1.7.4-SNAPSHOT.jar' )
+      expect(java_opts).to include('-javaagent:$PWD/.java-buildpack/pinpoint_agent/pinpoint-bootstrap-1.7.4-SNAPSHOT.jar1' )
     end
 
 
