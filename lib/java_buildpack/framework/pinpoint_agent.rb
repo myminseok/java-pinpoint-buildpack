@@ -43,7 +43,7 @@ module JavaBuildpack
       def compile
         download_zip(false, @droplet.sandbox, 'Pinpoint Agent')
         @droplet.copy_resources
-        download(@version, config_download_url)
+        download_local(@version, config_download_url)
         @droplet.copy_resources
 
       end
@@ -97,7 +97,7 @@ module JavaBuildpack
         ['latest', download_uri]
       end
 
-      def download(version, uri, name = @component_name)
+      def download_local(version, uri, name = @component_name)
         download_start_time = Time.now
         print "#{'----->'.red.bold} Downloading #{name.blue.bold} #{version.to_s.blue} from #{uri} "
 
