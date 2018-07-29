@@ -30,10 +30,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-
-
-      include JavaBuildpack::Util
-        download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
+        download_zip(false, @droplet.sandbox, 'Pinpoint Agent')
 
         #JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
         #  true, 'The Pinpoint Agent download location is always accessible'
