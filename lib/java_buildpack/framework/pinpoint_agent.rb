@@ -43,7 +43,7 @@ module JavaBuildpack
       def compile
         download_zip(false, @droplet.sandbox, 'Pinpoint Agent')
         @droplet.copy_resources
-        download_local(@version, config_download_url)
+        download_local()
         @droplet.copy_resources
 
       end
@@ -93,17 +93,14 @@ module JavaBuildpack
     
 
       def config_download_url
-        download_uri = "https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
+        download_uri = 
         ['latest', download_uri]
       end
 
-      def download_local(version, uri, name = @component_name)
-        download_start_time = Time.now
-        print "#{'----->'.red.bold} 2Downloading #{name.blue.bold} #{version.to_s.blue} from #{uri} "
+      def download_local()
 
-        shell "wget #{uri}"
+        shell "wget https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
         shell "pwd && ls -al"
-
        
       end
 
