@@ -28,10 +28,24 @@ module JavaBuildpack
     # Encapsulates the functionality for enabling zero-touch Dynatrace SaaS/Managed support.
     class PinpointAgent < JavaBuildpack::Component::VersionedDependencyComponent
 
+
+      # Creates an instance
+      #
+      # @param [Hash] context a collection of utilities used the component
+      def initialize(context)
+        super(context)
+        @version, @uri = config_download_url if supports?
+        @logger        = JavaBuildpack::Logging::LoggerFactory.instance.get_logger PinpointAgent
+      end
+
+
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_zip(false, @droplet.sandbox, 'Pinpoint Agent')
         @droplet.copy_resources
+        download(@version, @uri)
+        @droplet.copy_resources
+
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
@@ -77,6 +91,12 @@ module JavaBuildpack
                        :PINPOINT_PROFILER_COLLECTOR_SPAN_PORT, :FILTER
 
     
+
+      def config_download_url
+        download_uri = "#{api_base_url(credentials)}"
+        ['latest', download_uri]
+      end
+
 
       def expand(file)
         with_timing "1 Expanding PinpointAgent to #{@droplet.sandbox.relative_path_from(@droplet.root)}" do
