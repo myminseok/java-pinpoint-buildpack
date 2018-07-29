@@ -93,7 +93,7 @@ module JavaBuildpack
     
 
       def config_download_url
-        download_uri = "#{api_base_url(credentials)}"
+        download_uri = "https://raw.githubusercontent.com/myminseok/pinpoint_agent_repo/master/pinpoint.config"
         ['latest', download_uri]
       end
 
