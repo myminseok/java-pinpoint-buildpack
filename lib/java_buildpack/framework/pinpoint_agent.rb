@@ -34,7 +34,7 @@ module JavaBuildpack
       # @param [Hash] context a collection of utilities used the component
       def initialize(context)
         super(context)
-        @version, @uri = config_download_url if supports?
+       
         @logger        = JavaBuildpack::Logging::LoggerFactory.instance.get_logger PinpointAgent
       end
 
@@ -43,7 +43,7 @@ module JavaBuildpack
       def compile
         download_zip(false, @droplet.sandbox, 'Pinpoint Agent')
         @droplet.copy_resources
-        download(@version, @uri)
+        download(@version, config_download_url)
         @droplet.copy_resources
 
       end
